@@ -32,10 +32,10 @@ pipeline {
                     def nexusUsername = 'admin'
                     def nexusPassword = 'hamza'
                     def nexusRepository = 'hamza'
-                    sh "curl -u ${nexusUsername}:${nexusPassword} --upload-file ${componentsPath} ${nexusUrl}/repository/${nexusRepository}"
-                    sh "cd ${componentsPath} && curl -u ${nexusUsername}:${nexusPassword} --upload-file ./* ${nexusUrl}/repository/${nexusRepository}"
+                    sh "curl -u ${nexusUsername}:${nexusPassword} --upload-file ${componentsPath} http://localhost:8081/repository/hamza/"
+                    sh "cd ${componentsPath} && curl -u ${nexusUsername}:${nexusPassword} --upload-file ./* http://localhost:8081/repository/hamza/"
                     sh "curl -u admin:hamza --upload-file my-react-app.tar.gz ${nexusUrl}/repository/${nexusRepository}/my-react-app.tar.gz"
-                    sh "npm config set registry ${nexusUrl}/repository/${nexusRepository}"
+                    sh "npm config set registry http://localhost:8081/repository/hamza/"
                     sh "npm login --registry=${nexusUrl}/repository/${nexusRepository} --user=${nexusUsername} --password=${nexusPassword}"
                     sh "npm publish"
                 }
