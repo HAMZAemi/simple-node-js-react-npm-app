@@ -3,10 +3,7 @@ pipeline {
 
     environment {
         CI = 'true'
-        NEXUS_URL = 'http://localhost:8081' // URL de votre instance Nexus
-        NEXUS_REPO_ID = 'hamza' // ID de votre repository Nexus
-        NEXUS_REPO_USERNAME = 'admin' // Nom d'utilisateur pour le repository Nexus
-        NEXUS_REPO_PASSWORD = 'hamza' // Mot de passe pour le repository Nexus
+        // Mot de passe pour le repository Nexus
     }
 
     stages {
@@ -35,7 +32,19 @@ pipeline {
         }
         stage('Deploy to Nexus') {
             steps {
-                sh "curl -v -u ${NEXUS_REPO_USERNAME}:${NEXUS_REPO_PASSWORD} --upload-file my-react-app.tar.gz ${NEXUS_URL}/repository/${NEXUS_REPO_ID}/my-react-app.tar.gz"
+                script {
+                    def componentsPath = 'build/dist'
+                    def nexusUrl = 'http://localhost:8081'
+                    def nexusUsername = 'admin'
+                    def nexusPassword = 'hamza'
+                    def nexusRepository = 'hamza'
+                    sh "curl -u ${nexusUsername}:${nexusPassword} --upload-file ${componentsPath} ${nexusUrl}/repository/${nexusRepository}"
+                    sh "cd ${componentsPath} && curl -u ${nexusUsername}:${nexusPassword} --upload-file ./* ${nexusUrl}/repository/${nexusRepository}"
+                    sh "curl -u admin:hamza --upload-file my-react-app.tar.gz ${nexusUrl}/repository/${nexusRepository}/my-react-app.tar.gz"
+                    sh "npm config set registry ${nexusUrl}/repository/${nexusRepository}"
+                    sh "npm login --registry=${nexusUrl}/repository/${nexusRepository} --user=${nexusUsername} --password=${nexusPassword}"
+                    sh "npm publish"
+                }
             }
         }
     }
