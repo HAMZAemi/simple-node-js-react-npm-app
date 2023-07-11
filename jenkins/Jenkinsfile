@@ -33,7 +33,7 @@ pipeline {
         stage('Deploy to Nexus') {
             steps {
                 script {
-                    def componentsPath = 'build/dist'
+                    def componentsPath = ''
                     def nexusUrl = 'http://localhost:8081'
                     def nexusUsername = 'admin'
                     def nexusPassword = 'hamza'
