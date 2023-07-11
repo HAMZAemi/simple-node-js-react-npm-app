@@ -10,16 +10,25 @@ pipeline {
     }
 
     stages {
-        stage('Build and Package') {
+        stage('Checkout') {
+            steps {
+                git branch: 'master', url: 'https://github.com/username/my-react-app.git'
+            }
+        }
+        stage('Install Dependencies') {
             steps {
                 sh 'npm install'
+            }
+        }
+        stage('Build and Package') {
+            steps {
                 sh 'npm run build'
-                sh 'npm pack'
+                sh 'tar -zcvf my-react-app.tar.gz build/'
             }
         }
         stage('Test') {
             steps {
-                sh './jenkins/scripts/test.sh'
+                sh 'npm test'
             }
         }
         stage('Deliver') {
@@ -31,7 +40,7 @@ pipeline {
         }
         stage('Deploy to Nexus') {
             steps {
-                sh "curl -v -u ${NEXUS_REPO_USERNAME}:${NEXUS_REPO_PASSWORD} --upload-file my-app-1.0.0.tgz ${NEXUS_URL}/repository/${NEXUS_REPO_ID}/my-app-1.0.0.tgz"
+                sh "curl -v -u ${NEXUS_REPO_USERNAME}:${NEXUS_REPO_PASSWORD} --upload-file my-react-app.tar.gz ${NEXUS_URL}/repository/${NEXUS_REPO_ID}/my-react-app.tar.gz"
             }
         }
     }
