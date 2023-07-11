@@ -35,7 +35,8 @@ pipeline {
             }
         }
         stage('Deploy to Nexus') {
-            steps {
+            steps {        script {
+
            def componentsPath = 'dist'
           def nexusUrl = 'http://localhost:8081'
           def nexusUsername = 'admin'
@@ -54,7 +55,7 @@ pipeline {
           
           sh "npm login --registry=${nexusUrl}/repository/${nexusRepository} --user=${nexusUsername} --password=${nexusPassword}"
           sh "npm publish" 
-                
+            }  
                
             }
         }
