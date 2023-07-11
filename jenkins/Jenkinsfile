@@ -1,13 +1,20 @@
 pipeline {
-       agent any
+    agent any
 
     environment {
         CI = 'true'
+        NEXUS_URL = 'http://localhost:8081' // URL de votre instance Nexus
+        NEXUS_REPO_ID = 'hamza' // ID de votre repository Nexus
+        NEXUS_REPO_USERNAME = 'hamza' // Nom d'utilisateur pour le repository Nexus
+        NEXUS_REPO_PASSWORD = 'hamza' // Mot de passe pour le repository Nexus
     }
+
     stages {
-        stage('Build') {
+        stage('Build and Package') {
             steps {
                 sh 'npm install'
+                sh 'npm run build'
+                sh 'npm pack'
             }
         }
         stage('Test') {
@@ -18,8 +25,13 @@ pipeline {
         stage('Deliver') {
             steps {
                 sh './jenkins/scripts/deliver.sh'
-                input message: 'Finished using the web site? (Click "Proceed" to continue)'
+                input message: 'Avez-vous terminé d\'utiliser le site web? (Cliquez sur "Proceed" pour continuer)'
                 sh './jenkins/scripts/kill.sh'
+            }
+        }
+        stage('Deploy to Nexus') {
+            steps {
+                sh "curl -v -u ${NEXUS_REPO_USERNAME}:${NEXUS_REPO_PASSWORD} --upload-file my-app-1.0.0.tgz ${NEXUS_URL}/repository/${NEXUS_REPO_ID}/my-app-1.0.0.tgz"
             }
         }
     }
