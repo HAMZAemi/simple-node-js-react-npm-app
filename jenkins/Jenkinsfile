@@ -33,7 +33,7 @@ pipeline {
         stage('Deploy to Nexus') {
             steps {
                 script {
-                    def componentsPath = ''
+                    def componentsPath = "${env.WORKSPACE}/my-react-app.tar.gz"
                     def nexusUrl = 'http://localhost:8081'
                     def nexusUsername = 'admin'
                     def nexusPassword = 'hamza'
