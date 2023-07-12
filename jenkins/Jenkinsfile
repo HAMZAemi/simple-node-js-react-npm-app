@@ -32,10 +32,8 @@ pipeline {
                     def nexusUsername = 'exosdata'
                     def nexusPassword = 'stage'
                     def nexusRepository = 'simple'
-                    sh "curl -u ${nexusUsername}:${nexusPassword} --upload-file ${componentsPath} http://192.99.35.61:8081/repository/simple/"
-                    sh "cd ${componentsPath} && curl -u ${nexusUsername}:${nexusPassword} --upload-file ./* http://192.99.35.61:8081/repository/simple/"
-                    sh "curl -u exosdata:stage --upload-file my-react-app.tar.gz ${nexusUrl}/repository/${nexusRepository}/my-react-app.tar.gz"
-                    sh "npm config set registry http://192.99.35.61:8081/repository/simple/"
+                    sh "curl -u ${nexusUsername}:${nexusPassword} --upload-file ${componentsPath} ${nexusUrl}/repository/${nexusRepository}/my-react-app.tar.gz"
+                    sh "npm config set registry ${nexusUrl}/repository/${nexusRepository}/"
                     sh "npm login --registry=${nexusUrl}/repository/${nexusRepository} --user=${nexusUsername} --password=${nexusPassword}"
                     sh "npm publish"
                 }
