@@ -16,15 +16,13 @@ pipeline {
     
     stage('Deploy') {
       steps {
-        script {
-          zip archive: 'build.zip', dir: 'build'
-        }
+       
           
         withCredentials([usernamePassword(credentialsId: 'exosdata', passwordVariable: 'NEXUS_PASSWORD', usernameVariable: 'NEXUS_USERNAME')]) {
           sh """
-            
+            cd build
             curl -v -u "\$NEXUS_USERNAME:\$NEXUS_PASSWORD" \\
-            --upload-file build.zip \\
+            --upload-file favicon.ico \\
             'http://192.99.35.61:8081/repository/simple/'
           """    
         }  
