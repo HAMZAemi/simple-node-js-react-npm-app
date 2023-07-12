@@ -22,10 +22,11 @@ pipeline {
           
         withCredentials([usernamePassword(credentialsId: 'exosdata', passwordVariable: 'NEXUS_PASSWORD', usernameVariable: 'NEXUS_USERNAME')]) {
           sh """
+            cd build
             curl -v -u "\$NEXUS_USERNAME:\$NEXUS_PASSWORD" \\
             --upload-file build.zip \\
             'http://192.99.35.61:8081/repository/simple/\$REACT_APP_VERSION/build.zip'
-          """   
+          """    
         }  
       }    
     }
