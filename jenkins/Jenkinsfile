@@ -28,14 +28,14 @@ pipeline {
             steps {
                 script {
                     def componentsPath = "${env.WORKSPACE}/my-react-app.tar.gz"
-                    def nexusUrl = 'http://localhost:8081'
-                    def nexusUsername = 'admin'
-                    def nexusPassword = 'hamza'
-                    def nexusRepository = 'hamza'
-                    sh "curl -u ${nexusUsername}:${nexusPassword} --upload-file ${componentsPath} http://localhost:8081/repository/hamza/"
-                    sh "cd ${componentsPath} && curl -u ${nexusUsername}:${nexusPassword} --upload-file ./* http://localhost:8081/repository/hamza/"
-                    sh "curl -u admin:hamza --upload-file my-react-app.tar.gz ${nexusUrl}/repository/${nexusRepository}/my-react-app.tar.gz"
-                    sh "npm config set registry http://localhost:8081/repository/hamza/"
+                    def nexusUrl = 'http://192.99.35.61:8081'
+                    def nexusUsername = 'exosdata'
+                    def nexusPassword = 'stage'
+                    def nexusRepository = 'simple'
+                    sh "curl -u ${nexusUsername}:${nexusPassword} --upload-file ${componentsPath} http://192.99.35.61:8081/repository/simple/"
+                    sh "cd ${componentsPath} && curl -u ${nexusUsername}:${nexusPassword} --upload-file ./* http://192.99.35.61:8081/repository/simple/"
+                    sh "curl -u exosdata:stage --upload-file my-react-app.tar.gz ${nexusUrl}/repository/${nexusRepository}/my-react-app.tar.gz"
+                    sh "npm config set registry http://192.99.35.61:8081/repository/simple/"
                     sh "npm login --registry=${nexusUrl}/repository/${nexusRepository} --user=${nexusUsername} --password=${nexusPassword}"
                     sh "npm publish"
                 }
