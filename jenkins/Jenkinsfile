@@ -1,43 +1,67 @@
 pipeline {
-    agent any
 
-    environment {
-        CI = 'true'
-        // Mot de passe pour le repository Nexus
+  agent any
+
+  environment {
+    CI = 'true'
+    NEXUS_USERNAME = credentials('exosdata')
+    NEXUS_PASSWORD = credentials('stage')
+  }
+
+  stages {
+
+    stage('Install Dependencies') {
+      steps {
+        sh 'npm install'
+      }
     }
 
-    stages {
-        stage('Install Dependencies') {
-            steps {
-                sh 'npm install'
-            }
-        }
-        stage('Build and Package') {
-            steps {
-                sh 'npm run build'
-                sh 'tar -zcvf my-react-app.tar.gz build/'
-            }
-        }
-        stage('Test') {
-            steps {
-                sh 'npm test'
-            }
-        }
-   
-        stage('Deploy to Nexus') {
-            steps {
-                script {
-                    def componentsPath = "${env.WORKSPACE}/my-react-app.tar.gz"
-                    def nexusUrl = 'http://192.99.35.61:8081'
-                    def nexusUsername = 'exosdata'
-                    def nexusPassword = 'stage'
-                    def nexusRepository = 'simple'
-                    sh "curl -u ${nexusUsername}:${nexusPassword} --upload-file ${componentsPath} ${nexusUrl}/repository/${nexusRepository}/my-react-app.tar.gz"
-                    sh "npm config set registry ${nexusUrl}/repository/${nexusRepository}/"
-                    sh "npm login --registry=${nexusUrl}/repository/${nexusRepository} --user=${nexusUsername} --password=${nexusPassword}"
-                    sh "npm publish"
-                }
-            }
-        }
+    stage('Build') {
+      steps {
+        sh 'npm run build'
+      }
     }
+
+    stage('Test') {
+      steps {
+        sh 'npm test'
+      }
+    }
+
+    stage('Package') {
+      steps {
+        sh 'tar -zcvf build.tar.gz build/'
+      }
+    }
+
+    stage('Deploy to Nexus') {
+      steps {
+        script {
+        
+          def nexusUrl = 'http://192.99.35.61:8081'
+          def nexusRepo = 'simple'
+          def fileName = 'build.tar.gz'
+          
+          nexusArtifactUploader(
+            nexusVersion: 'nexus3',
+            protocol: 'http',
+            nexusUrl: nexusUrl,
+            nexusRepository: nexusRepo,
+            groupId: 'com.mycompany',
+            repository: nexusRepo,
+            credentialsId: 'nexus-credentials',
+            username: env.NEXUS_USERNAME,
+            artifacts: [
+              [artifactId: 'simple',
+               file: "${env.WORKSPACE}/${fileName}",
+               type: 'tar.gz']
+            ]
+          )
+              
+        }
+      }
+    }
+
+  }
+
 }
