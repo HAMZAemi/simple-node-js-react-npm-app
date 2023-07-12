@@ -1,43 +1,36 @@
 pipeline {
-    agent any
-
-    environment {
-        CI = 'true'
-        // Mot de passe pour le repository Nexus
+  agent any
+  
+  tools {
+    nodejs "nodejs-version"
+  }
+  
+  environment {
+    REACT_APP_VERSION = "1.0.0"
+  }
+  
+  stages {
+    stage('Build') {
+      steps {
+        sh 'npm install'
+        sh 'npm run build' 
+      }
     }
-
-    stages {
-        stage('Install Dependencies') {
-            steps {
-                sh 'npm install'
-            }
+    
+    stage('Deploy') {
+      steps {
+        script {
+          zip archive: 'build.zip', dir: 'build'
         }
-        stage('Build and Package') {
-            steps {
-                sh 'npm run build'
-                sh 'tar -zcvf my-react-app.tar.gz build/'
-            }
-        }
-        stage('Test') {
-            steps {
-                sh 'npm test'
-            }
-        }
-   
-        stage('Deploy to Nexus') {
-            steps {
-                script {
-                    def componentsPath = "${env.WORKSPACE}/my-react-app.tar.gz"
-                    def nexusUrl = 'http://192.99.35.61:8081'
-                    def nexusUsername = 'exosdata'
-                    def nexusPassword = 'stage'
-                    def nexusRepository = 'simple'
-                    sh "curl -u ${nexusUsername}:${nexusPassword} --upload-file ${componentsPath} ${nexusUrl}/repository/${nexusRepository}/my-react-app.tar.gz"
-                    sh "npm config set registry ${nexusUrl}/repository/${nexusRepository}/"
-                    sh "npm login --registry=${nexusUrl}/repository/${nexusRepository} --user=${nexusUsername} --password=${nexusPassword}"
-                    sh "npm publish"
-                }
-            }
-        }
+          
+        withCredentials([usernamePassword(credentialsId: 'nexus-creds', passwordVariable: 'NEXUS_PASSWORD', usernameVariable: 'NEXUS_USERNAME')]) {
+          sh """
+            curl -v -u "\$NEXUS_USERNAME:\$NEXUS_PASSWORD" \\
+            --upload-file build.zip \\
+            'http://192.99.35.61:8081/repository/simple/\$REACT_APP_VERSION/build.zip'
+          """   
+        }  
+      }    
     }
+  }
 }
