@@ -20,7 +20,7 @@ pipeline {
           zip archive: 'build.zip', dir: 'build'
         }
           
-        withCredentials([usernamePassword(credentialsId: 'nexus-creds', passwordVariable: 'NEXUS_PASSWORD', usernameVariable: 'NEXUS_USERNAME')]) {
+        withCredentials([usernamePassword(credentialsId: 'exosdata', passwordVariable: 'NEXUS_PASSWORD', usernameVariable: 'NEXUS_USERNAME')]) {
           sh """
             curl -v -u "\$NEXUS_USERNAME:\$NEXUS_PASSWORD" \\
             --upload-file build.zip \\
